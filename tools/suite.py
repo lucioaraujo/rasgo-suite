@@ -318,9 +318,13 @@ def cmd_macos(a):
         for i in lock["instrumentos"]:
             arq = i["arquivos"]["macos"]
             ponto = pathlib.Path(tmp) / ("vol-" + i["id"])
+            # Os .dmg do CPack trazem a licença como contrato (SLA): sem
+            # terminal, o hdiutil cancela. O "Y" na entrada aceita o contrato,
+            # que é a licença livre do próprio instrumento.
             subprocess.run(["hdiutil", "attach", "-nobrowse", "-readonly", "-noautoopen",
                             "-mountpoint", str(ponto), str(dl / arq["nome"])], check=True,
-                           stdout=subprocess.DEVNULL)
+                           input=b"Y\n" * 4, stdout=subprocess.DEVNULL,
+                           env=dict(os.environ, PAGER="true"))
             try:
                 app = ponto / arq["app"]
                 if not app.is_dir():

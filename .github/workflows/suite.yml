@@ -176,6 +176,10 @@ jobs:
         if: startsWith(matrix.imagem, 'debian') || startsWith(matrix.imagem, 'ubuntu')
         run: |
           set -eu
+          # uma tela virtual para o passo inteiro (subir e derrubar o Xvfb a
+          # cada app deixa a trava do display e o app seguinte fica sem tela)
+          Xvfb :99 -screen 0 1600x1000x24 -nolisten tcp >/dev/null 2>&1 &
+          export DISPLAY=:99 && sleep 2
           mkdir deb && tar -xzf dist/rasgo-suite-*-linux-x86_64.tar.gz -C deb
           DEBIAN_FRONTEND=noninteractive deb/*/install.sh
           python3 tools/suite.py listar --campo arquivos.deb.comando | while IFS= read -r cmd; do
@@ -184,6 +188,8 @@ jobs:
       - name: Pacote portátil (install.sh sem root) e abrir cada instrumento
         run: |
           set -eu
+          Xvfb :98 -screen 0 1600x1000x24 -nolisten tcp >/dev/null 2>&1 &
+          export DISPLAY=:98 && sleep 2
           mkdir port && tar -xzf dist/rasgo-suite-*-linux-x86_64-appimage.tar.gz -C port
           export HOME=/tmp/casa && mkdir -p "$HOME"
           port/*/install.sh
