@@ -102,15 +102,22 @@ jobs:
           DMG=$(ls dist/*.dmg)
           hdiutil attach -nobrowse -readonly -mountpoint /tmp/suite "$DMG"
           ls -la /tmp/suite
+          cat dist/assinaturas-macos.txt
           python3 tools/suite.py listar --campo arquivos.macos.app | while IFS= read -r app; do
             test -d "/tmp/suite/$app" || { echo "::error::falta $app"; exit 1; }
-            codesign --verify --deep --strict "/tmp/suite/$app"
-            echo "ok: $app"
+            # a cópia da suíte tem de verificar igual ao app da release dele
+            if codesign --verify --deep --strict "/tmp/suite/$app" 2>/dev/null; then agora=valida; else agora=invalida; fi
+            antes=$(grep -F "$app	" dist/assinaturas-macos.txt | cut -f2 | cut -d: -f1)
+            if [ "$agora" != "$antes" ]; then echo "::error::$app: $antes na release, $agora na suíte"; exit 1; fi
+            [ "$agora" = valida ] || echo "::warning::$app já vem com a assinatura inválida na release do instrumento"
+            echo "ok: $app ($agora, igual à release)"
           done
           test -L /tmp/suite/Applications
           hdiutil detach /tmp/suite
       - uses: actions/upload-artifact@v4
         with: {name: suite-macos, path: dist/*.dmg}
+      - uses: actions/upload-artifact@v4
+        with: {name: assinaturas-macos, path: dist/assinaturas-macos.txt}
 
   # ---- os testes ------------------------------------------------------------
   testar-windows:

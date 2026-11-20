@@ -315,6 +315,7 @@ def cmd_macos(a):
     with tempfile.TemporaryDirectory() as tmp:
         palco = pathlib.Path(tmp) / "RASGO Suite"
         palco.mkdir()
+        assinaturas = []
         for i in lock["instrumentos"]:
             arq = i["arquivos"]["macos"]
             ponto = pathlib.Path(tmp) / ("vol-" + i["id"])
@@ -329,6 +330,13 @@ def cmd_macos(a):
                 app = ponto / arq["app"]
                 if not app.is_dir():
                     raise Falha("%s: %s não está no .dmg" % (arq["nome"], arq["app"]))
+                # a assinatura como veio da release do instrumento: o teste do
+                # .dmg da suíte compara com ela (a suíte não conserta nem estraga)
+                v = subprocess.run(["codesign", "--verify", "--deep", "--strict", str(app)],
+                                   capture_output=True, text=True)
+                estado = "valida" if v.returncode == 0 else "invalida: " + v.stderr.strip().replace("\n", " ")
+                assinaturas.append("%s\t%s" % (arq["app"], estado))
+                print("%s na release de %s: %s" % (arq["app"], i["nome"], estado))
                 # ditto preserva a assinatura, os atributos e os links do bundle
                 subprocess.run(["ditto", str(app), str(palco / arq["app"])], check=True)
             finally:
@@ -338,6 +346,7 @@ def cmd_macos(a):
         shutil.copy(RAIZ / "macos" / "LEIA-ME.txt", palco / "READ ME.txt")
         if destino.exists():
             destino.unlink()
+        (saida / "assinaturas-macos.txt").write_text("\n".join(assinaturas) + "\n", encoding="utf-8")
         subprocess.run(["hdiutil", "create", "-volname", "RASGO Suite %s" % versao, "-srcfolder",
                         str(palco), "-format", "UDZO", "-imagekey", "zlib-level=9", "-ov",
                         str(destino)], check=True)
