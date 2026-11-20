@@ -37,6 +37,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.request
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
@@ -347,9 +348,18 @@ def cmd_macos(a):
         if destino.exists():
             destino.unlink()
         (saida / "assinaturas-macos.txt").write_text("\n".join(assinaturas) + "\n", encoding="utf-8")
-        subprocess.run(["hdiutil", "create", "-volname", "RASGO Suite %s" % versao, "-srcfolder",
-                        str(palco), "-format", "UDZO", "-imagekey", "zlib-level=9", "-ov",
-                        str(destino)], check=True)
+        # "Resource busy" é falha conhecida e passageira do hdiutil nos
+        # runners do GitHub: tenta de novo algumas vezes antes de desistir
+        for tentativa in range(1, 6):
+            r = subprocess.run(["hdiutil", "create", "-volname", "RASGO Suite %s" % versao,
+                                "-srcfolder", str(palco), "-format", "UDZO",
+                                "-imagekey", "zlib-level=9", "-ov", str(destino)])
+            if r.returncode == 0:
+                break
+            print("hdiutil create falhou (tentativa %d), de novo em %d s" % (tentativa, 5 * tentativa))
+            time.sleep(5 * tentativa)
+        else:
+            raise Falha("hdiutil create falhou 5 vezes")
     print(destino)
 
 
