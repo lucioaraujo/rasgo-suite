@@ -1,0 +1,96 @@
+{
+  "nome": "RASGO Suite",
+  "comentario": "A lista da suíte: cada instrumento, o repositório oficial e o padrão do arquivo de cada sistema na release. Os padrões aceitam o nome antigo (win64, Darwin, Linux) e o do padrão de 18/11/2026 (windows-x64, macos-universal, linux-x86_64), para a suíte seguir funcionando quando cada instrumento trocar o nome na próxima versão.",
+  "instrumentos": [
+    {
+      "id": "antitotem",
+      "nome": "Antitotem",
+      "repo": "lucioaraujo/antitotem",
+      "site": "https://lucioaraujo.github.io/antitotem/",
+      "windows": {"arquivo": "^antitotem-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Antitotem - Objeto Sonoro.exe"},
+      "macos": {"arquivo": "^antitotem-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Antitotem - Objeto Sonoro.app"},
+      "deb": {"arquivo": "^antitotem-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/antitotem"},
+      "portatil": {"arquivo": "^antitotem-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Antitotem - Objeto Sonoro"}
+    },
+    {
+      "id": "aquorbium",
+      "nome": "Aquorbium",
+      "repo": "lucioaraujo/aquorbium",
+      "site": "https://lucioaraujo.github.io/aquorbium/",
+      "windows": {"arquivo": "^aquorbium-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Aquorbium.exe"},
+      "macos": {"arquivo": "^aquorbium-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Aquorbium.app"},
+      "deb": {"arquivo": "^aquorbium-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/aquorbium"},
+      "portatil": {"arquivo": "^aquorbium-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Aquorbium"}
+    },
+    {
+      "id": "batruc",
+      "nome": "Batruc",
+      "repo": "lucioaraujo/batruc",
+      "site": "https://lucioaraujo.github.io/batruc/",
+      "windows": {"arquivo": "^batruc-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Batruc.exe"},
+      "macos": {"arquivo": "^batruc-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Batruc.app"},
+      "deb": {"arquivo": "^batruc-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/batruc"},
+      "portatil": {"arquivo": "^batruc-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Batruc"}
+    },
+    {
+      "id": "maestruc",
+      "nome": "Maestruc",
+      "repo": "lucioaraujo/maestruc",
+      "site": "https://lucioaraujo.github.io/maestruc/",
+      "windows": {"arquivo": "^maestruc-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Maestruc.exe"},
+      "macos": {"arquivo": "^maestruc-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Maestruc.app"},
+      "deb": {"arquivo": "^maestruc-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/maestruc"},
+      "portatil": {"arquivo": "^maestruc-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Maestruc"}
+    },
+    {
+      "id": "navalha2",
+      "nome": "Navalha 2",
+      "repo": "lucioaraujo/navalha2-juce",
+      "site": "https://lucioaraujo.github.io/navalha2-juce/",
+      "windows": {"arquivo": "^navalha2-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Navalha 2.exe"},
+      "macos": {"arquivo": "^navalha2-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Navalha 2.app"},
+      "deb": {"arquivo": "^navalha2([_-])[0-9][0-9.]*([_-])(x86_64|linux-x86_64)\\.deb$", "comando": "/usr/bin/Navalha 2"},
+      "portatil": {"arquivo": "^navalha2-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Navalha 2"}
+    },
+    {
+      "id": "rasgo-modular",
+      "nome": "Rasgo Modular",
+      "repo": "lucioaraujo/rasgo-modular",
+      "site": "https://lucioaraujo.github.io/rasgo-modular/",
+      "windows": {"arquivo": "^rasgo-modular-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Rasgo Modular.exe"},
+      "macos": {"arquivo": "^rasgo-modular-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Rasgo Modular.app"},
+      "deb": {"arquivo": "^rasgo-modular-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/rasgo-modular"},
+      "portatil": {"arquivo": "^rasgo-modular-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Rasgo Modular"}
+    },
+    {
+      "id": "rasgo-synth-asterismus",
+      "nome": "Rasgo Synth Asterismus",
+      "repo": "lucioaraujo/rasgo-synth-asterismus",
+      "site": "https://lucioaraujo.github.io/rasgo-synth-asterismus/",
+      "windows": {"arquivo": "^rasgo-synth-asterismus-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Rasgo Synth Asterismus.exe"},
+      "macos": {"arquivo": "^rasgo-synth-asterismus-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Rasgo Synth Asterismus.app"},
+      "deb": {"arquivo": "^rasgo-synth-asterismus-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/rasgo-synth-asterismus"},
+      "portatil": {"arquivo": ["^rasgo-synth-asterismus-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "^rasgo-synth-asterismus-[0-9][0-9.]*-(Linux|linux-x86_64)\\.tar\\.gz$"], "tipo": "auto", "wmclass": "Rasgo Synth Asterismus", "binario_tar": "usr/bin/rasgo-synth-asterismus"}
+    },
+    {
+      "id": "rasgo-synth-studio",
+      "nome": "Rasgo Synth Studio",
+      "repo": "lucioaraujo/rasgo-synth-studio",
+      "site": "https://lucioaraujo.github.io/rasgo-synth-studio/",
+      "windows": {"arquivo": "^rasgo-synth-studio-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Rasgo Synth Studio.exe"},
+      "macos": {"arquivo": "^rasgo-synth-studio-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Rasgo Synth Studio.app"},
+      "deb": {"arquivo": "^rasgo-synth-studio-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/rasgo-synth-studio"},
+      "portatil": {"arquivo": "^rasgo-synth-studio-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Rasgo Synth"}
+    },
+    {
+      "id": "trioio",
+      "nome": "Trioio",
+      "repo": "lucioaraujo/trioio",
+      "site": "https://lucioaraujo.github.io/trioio/",
+      "windows": {"arquivo": "^trioio-[0-9][0-9.]*-(win64|windows-x64)\\.exe$", "exe": "Trioio.exe"},
+      "macos": {"arquivo": "^trioio-[0-9][0-9.]*-(Darwin|macos-universal)\\.dmg$", "app": "Trioio.app"},
+      "deb": {"arquivo": "^trioio-[0-9][0-9.]*-(Linux|linux-x86_64)\\.deb$", "comando": "/usr/bin/trioio"},
+      "portatil": {"arquivo": "^trioio-[0-9][0-9.]*-linux-x86_64\\.AppImage$", "tipo": "appimage", "wmclass": "Trioio"}
+    }
+  ]
+}

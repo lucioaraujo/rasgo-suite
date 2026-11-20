@@ -1,0 +1,60 @@
+RASGO Suite — macOS
+
+EN
+1. Drag all the instruments onto the Applications folder, at once.
+   The same .dmg serves Intel and Apple Silicon Macs.
+2. On first launch macOS blocks each instrument and says Apple could not
+   confirm it is free of malware. The instruments carry an ad-hoc signature,
+   without Apple Developer ID or notarisation. Click "OK" or "Done".
+3. Clear them once, all together: open Terminal, paste this line and press
+   Enter (no output means it worked). It only removes the quarantine mark
+   macOS puts on every downloaded file:
+
+   xattr -dr com.apple.quarantine /Applications/Antitotem*.app /Applications/Aquorbium.app /Applications/Batruc.app /Applications/Maestruc.app "/Applications/Navalha 2.app" /Applications/Rasgo*.app /Applications/Trioio.app
+
+   Or one by one: System Settings → Privacy & Security → "Open Anyway".
+4. SUITE.txt lists the version, the source release and the SHA-256 of each
+   instrument. Questions: rasgo.instruments@gmail.com
+
+PT
+1. Arraste todos os instrumentos para a pasta Aplicativos, de uma vez.
+   O mesmo .dmg serve para Mac Intel e Apple Silicon.
+2. Na primeira abertura, o macOS bloqueia cada instrumento e diz que a Apple
+   não pôde confirmar que ele está livre de software malicioso. Os
+   instrumentos têm assinatura ad-hoc, sem Developer ID nem notarização.
+   Clique em "OK" ou "Concluído".
+3. Libere todos de uma vez: abra o Terminal, cole a linha do passo 3 em EN e
+   aperte Enter (se nada aparecer, deu certo). Ela só retira a marca de
+   quarentena que o macOS põe em todo arquivo baixado.
+   Ou um por um: Ajustes do Sistema → Privacidade e Segurança → "Abrir Mesmo Assim".
+4. O SUITE.txt lista a versão, a release de origem e o SHA-256 de cada
+   instrumento. Dúvidas: rasgo.instruments@gmail.com
+
+FR
+1. Glissez tous les instruments sur le dossier Applications, d'un coup.
+   Le même .dmg sert aux Mac Intel et Apple Silicon.
+2. À la première ouverture, macOS bloque chaque instrument et dit qu'Apple
+   n'a pas pu confirmer qu'il est exempt de logiciel malveillant. Les
+   instruments portent une signature ad hoc, sans Developer ID ni
+   notarisation. Cliquez sur « OK » ou « Terminé ».
+3. Libérez-les tous à la fois : ouvrez le Terminal, collez la ligne de
+   l'étape 3 en EN et appuyez sur Entrée (rien ne s'affiche si tout va bien).
+   Elle retire seulement la marque de quarantaine que macOS pose sur tout
+   fichier téléchargé.
+   Ou un par un : Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
+4. SUITE.txt donne la version, la release d'origine et le SHA-256 de chaque
+   instrument. Questions : rasgo.instruments@gmail.com
+
+ES
+1. Arrastre todos los instrumentos a la carpeta Aplicaciones, de una vez.
+   El mismo .dmg sirve para Mac Intel y Apple Silicon.
+2. En la primera apertura, macOS bloquea cada instrumento y dice que Apple
+   no pudo confirmar que está libre de software malicioso. Los instrumentos
+   llevan firma ad hoc, sin Developer ID ni notarización. Haga clic en
+   "OK" o "Listo".
+3. Libérelos todos a la vez: abra el Terminal, pegue la línea del paso 3 en
+   EN y pulse Intro (si no aparece nada, funcionó). Solo quita la marca de
+   cuarentena que macOS pone en todo archivo descargado.
+   O uno por uno: Ajustes del Sistema → Privacidad y seguridad → "Abrir igualmente".
+4. SUITE.txt indica la versión, la release de origen y el SHA-256 de cada
+   instrumento. Preguntas: rasgo.instruments@gmail.com

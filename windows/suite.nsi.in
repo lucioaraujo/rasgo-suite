@@ -1,0 +1,70 @@
+; RASGO Suite — instalador do Windows (modelo; tools/suite.py preenche os @CAMPOS@).
+; Leva dentro os instaladores oficiais de cada instrumento e roda cada um em
+; modo silencioso. Cada instrumento fica onde ficaria instalado sozinho, com
+; atalhos e desinstalador próprios; a suíte não deixa arquivos dela.
+
+Unicode true
+SetCompressor /SOLID lzma
+RequestExecutionLevel admin
+ManifestDPIAware true
+
+!include "MUI2.nsh"
+
+Name "RASGO Suite @VERSAO@"
+OutFile "@SAIDA@"
+BrandingText "RASGO Suite @VERSAO@"
+ShowInstDetails show
+
+Var Falhas
+
+!define MUI_ABORTWARNING
+!define MUI_COMPONENTSPAGE_SMALLDESC
+!define MUI_WELCOMEPAGE_TEXT "$(boasvindas)"
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "PortugueseBR"
+!insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_LANGUAGE "Spanish"
+
+LangString instalando ${LANG_ENGLISH} "Installing"
+LangString instalando ${LANG_PORTUGUESEBR} "Instalando"
+LangString instalando ${LANG_FRENCH} "Installation de"
+LangString instalando ${LANG_SPANISH} "Instalando"
+
+LangString falhou ${LANG_ENGLISH} "Installer returned an error for"
+LangString falhou ${LANG_PORTUGUESEBR} "O instalador devolveu um erro para"
+LangString falhou ${LANG_FRENCH} "L'installeur a renvoyé une erreur pour"
+LangString falhou ${LANG_SPANISH} "El instalador devolvió un error para"
+
+LangString resumo ${LANG_ENGLISH} "These instruments did not install:"
+LangString resumo ${LANG_PORTUGUESEBR} "Estes instrumentos não foram instalados:"
+LangString resumo ${LANG_FRENCH} "Ces instruments n'ont pas été installés :"
+LangString resumo ${LANG_SPANISH} "Estos instrumentos no se instalaron:"
+
+LangString boasvindas ${LANG_ENGLISH} "The RASGO family of digital instruments, each one exactly as its own release published it.$\r$\n$\r$\nEach instrument installs in its own folder, with its own Start menu shortcut and its own uninstaller in Settings → Apps.$\r$\n$\r$\nChoose the instruments on the next page: all of them are selected."
+LangString boasvindas ${LANG_PORTUGUESEBR} "A família RASGO de instrumentos digitais, cada um exatamente como a release dele publicou.$\r$\n$\r$\nCada instrumento se instala na própria pasta, com atalho próprio no menu Iniciar e desinstalador próprio em Configurações → Aplicativos.$\r$\n$\r$\nEscolha os instrumentos na próxima página: todos vêm marcados."
+LangString boasvindas ${LANG_FRENCH} "La famille RASGO d'instruments numériques, chacun exactement tel que sa propre version l'a publié.$\r$\n$\r$\nChaque instrument s'installe dans son propre dossier, avec son raccourci dans le menu Démarrer et son propre désinstalleur dans Paramètres → Applications.$\r$\n$\r$\nChoisissez les instruments à la page suivante : tous sont cochés."
+LangString boasvindas ${LANG_SPANISH} "La familia RASGO de instrumentos digitales, cada uno exactamente como lo publicó su propia versión.$\r$\n$\r$\nCada instrumento se instala en su propia carpeta, con su acceso directo en el menú Inicio y su propio desinstalador en Configuración → Aplicaciones.$\r$\n$\r$\nElija los instrumentos en la página siguiente: todos vienen marcados."
+
+
+Function .onInit
+  InitPluginsDir
+  !insertmacro MUI_LANGDLL_DISPLAY
+FunctionEnd
+
+@SECOES@
+
+Section "-fim"
+  StrCmp $Falhas "" fim
+    MessageBox MB_ICONEXCLAMATION|MB_OK "$(resumo)$\r$\n$Falhas" /SD IDOK
+    SetErrorLevel 2
+  fim:
+SectionEnd
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+@DESCRICOES@
+!insertmacro MUI_FUNCTION_DESCRIPTION_END

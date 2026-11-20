@@ -1,0 +1,229 @@
+# RASGO Suite: reúne as últimas releases oficiais de cada instrumento, sem
+# recompilar nada, testa os pacotes nos três sistemas e, numa tag, publica.
+#
+# Repositório público: o Actions não é cobrado (nem o runner macOS).
+# Roda à mão (Actions → RASGO Suite → Run workflow) ou numa tag vAAAA.MM.
+# Tag com hífen (v2026.11-rc1) vira pré-release, para o autor instalar e
+# testar antes da versão final, como no fluxo de publicação da família.
+name: RASGO Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: "Versão da suíte (AAAA.MM ou AAAA.MM-rcN), usada só no nome dos pacotes"
+        required: true
+        default: "2026.11-rc1"
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: suite-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---- a foto: qual release de cada instrumento entra ----------------------
+  resolver:
+    runs-on: ubuntu-latest
+    outputs:
+      versao: ${{ steps.v.outputs.versao }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versão da suíte
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = push ]; then V="${GITHUB_REF_NAME#v}"; else V="${{ inputs.versao }}"; fi
+          echo "versao=$V" >> "$GITHUB_OUTPUT"
+          echo "Suíte $V"
+      - name: Testes do script
+        run: python3 -m unittest discover -s tests -v
+      - name: Últimas releases oficiais
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/suite.py resolver --saida build/lock.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lock
+          path: build/lock.json
+
+  # ---- os pacotes -----------------------------------------------------------
+  linux:
+    needs: resolver
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: lock, path: build}
+      - name: Baixar e conferir (.deb e AppImage)
+        run: |
+          python3 tools/suite.py baixar --sistema deb
+          python3 tools/suite.py baixar --sistema portatil
+      - name: Montar
+        run: |
+          python3 tools/suite.py deb --versao "${{ needs.resolver.outputs.versao }}"
+          python3 tools/suite.py portatil --versao "${{ needs.resolver.outputs.versao }}"
+          python3 tools/suite.py suite-txt --versao "${{ needs.resolver.outputs.versao }}"
+      - uses: actions/upload-artifact@v4
+        with: {name: suite-linux, path: dist/}
+
+  windows:
+    needs: resolver
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: lock, path: build}
+      - name: NSIS
+        run: sudo apt-get update && sudo apt-get install -y nsis
+      - name: Baixar e conferir os instaladores oficiais
+        run: python3 tools/suite.py baixar --sistema windows
+      - name: Montar o instalador da suíte
+        run: python3 tools/suite.py windows --versao "${{ needs.resolver.outputs.versao }}"
+      - uses: actions/upload-artifact@v4
+        with: {name: suite-windows, path: dist/*.exe}
+
+  macos:
+    needs: resolver
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: lock, path: build}
+      - name: Baixar e conferir os .dmg oficiais
+        run: python3 tools/suite.py baixar --sistema macos
+      - name: Montar o .dmg da suíte
+        run: python3 tools/suite.py macos --versao "${{ needs.resolver.outputs.versao }}"
+      - name: Conferir o .dmg (montar, listar, assinatura de cada app)
+        run: |
+          set -eu
+          DMG=$(ls dist/*.dmg)
+          hdiutil attach -nobrowse -readonly -mountpoint /tmp/suite "$DMG"
+          ls -la /tmp/suite
+          python3 tools/suite.py listar --campo arquivos.macos.app | while IFS= read -r app; do
+            test -d "/tmp/suite/$app" || { echo "::error::falta $app"; exit 1; }
+            codesign --verify --deep --strict "/tmp/suite/$app"
+            echo "ok: $app"
+          done
+          test -L /tmp/suite/Applications
+          hdiutil detach /tmp/suite
+      - uses: actions/upload-artifact@v4
+        with: {name: suite-macos, path: dist/*.dmg}
+
+  # ---- os testes ------------------------------------------------------------
+  testar-windows:
+    needs: windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: lock, path: build}
+      - uses: actions/download-artifact@v4
+        with: {name: suite-windows, path: dist}
+      - name: Instalar a suíte em modo silencioso
+        shell: pwsh
+        run: |
+          $exe = (Get-ChildItem dist\*.exe | Select-Object -First 1).FullName
+          $p = Start-Process -FilePath $exe -ArgumentList '/S' -Wait -PassThru
+          "código de saída: $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { throw "a suíte devolveu $($p.ExitCode)" }
+      - name: Conferir cada instrumento instalado
+        shell: pwsh
+        run: |
+          $faltam = @()
+          $raizes = @($env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ }
+          foreach ($nome in (python tools/suite.py listar --campo arquivos.windows.exe)) {
+            $achado = Get-ChildItem -Path $raizes -Recurse -Filter $nome -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($achado) { "ok: $($achado.FullName)" } else { $faltam += $nome }
+          }
+          if ($faltam.Count) { throw "não instalados: $($faltam -join ', ')" }
+
+  testar-linux:
+    needs: linux
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        imagem: ['debian:12', 'ubuntu:24.04', 'fedora:latest', 'archlinux:latest']
+    container: ${{ matrix.imagem }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: lock, path: build}
+      - uses: actions/download-artifact@v4
+        with: {name: suite-linux, path: dist}
+      - name: O básico de um desktop
+        run: |
+          set -eux
+          case "${{ matrix.imagem }}" in
+            debian:*|ubuntu:*)
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y python3 xvfb libx11-6 libxext6 libxrandr2 \
+                libxcursor1 libxinerama1 libxrender1 fonts-dejavu-core desktop-file-utils ;;
+            fedora:*)
+              dnf install -y python3 xorg-x11-server-Xvfb alsa-lib freetype fontconfig \
+                libX11 libXext libXrandr libXcursor libXinerama libXrender dejavu-sans-fonts \
+                desktop-file-utils ;;
+            archlinux:*)
+              pacman -Syu --noconfirm python xorg-server-xvfb alsa-lib freetype2 fontconfig \
+                libx11 libxext libxrandr libxcursor libxinerama libxrender ttf-dejavu \
+                desktop-file-utils ;;
+          esac
+      - name: Pacote .deb (install.sh) e abrir cada instrumento
+        if: startsWith(matrix.imagem, 'debian') || startsWith(matrix.imagem, 'ubuntu')
+        run: |
+          set -eu
+          mkdir deb && tar -xzf dist/rasgo-suite-*-linux-x86_64.tar.gz -C deb
+          DEBIAN_FRONTEND=noninteractive deb/*/install.sh
+          python3 tools/suite.py listar --campo arquivos.deb.comando | while IFS= read -r cmd; do
+            linux/testar-abertura.sh "$cmd" </dev/null
+          done
+      - name: Pacote portátil (install.sh sem root) e abrir cada instrumento
+        run: |
+          set -eu
+          mkdir port && tar -xzf dist/rasgo-suite-*-linux-x86_64-appimage.tar.gz -C port
+          export HOME=/tmp/casa && mkdir -p "$HOME"
+          port/*/install.sh
+          n=$(ls "$HOME/.local/share/applications/"rasgo-*.desktop | wc -l)
+          test "$n" = 9 || { echo "::error::$n atalhos, esperados 9"; exit 1; }
+          python3 tools/suite.py listar --campo id | while IFS= read -r id; do
+            linux/testar-abertura.sh "$HOME/.local/bin/$id" </dev/null
+          done
+          port/*/uninstall.sh
+          test ! -e "$HOME/.local/opt/rasgo" || { echo "::error::uninstall.sh deixou arquivos"; exit 1; }
+
+  # ---- a release: só numa tag, depois de todos os testes ---------------------
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [resolver, macos, testar-windows, testar-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {path: pacotes}
+      - name: Conferir o que chegou
+        run: |
+          set -eu
+          find pacotes -type f -print
+          for f in windows-x64.exe macos-universal.dmg linux-x86_64.tar.gz linux-x86_64-appimage.tar.gz; do
+            find pacotes -type f -name "rasgo-suite-*-$f" | grep -q . || { echo "::error::falta *-$f"; exit 1; }
+          done
+          test -f pacotes/suite-linux/SUITE.txt
+      - name: Criar a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRE=""
+          case "${GITHUB_REF_NAME}" in *-*) PRE="--prerelease" ;; esac
+          gh release create "${GITHUB_REF_NAME}" ${PRE} \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "RASGO Suite ${GITHUB_REF_NAME#v}" \
+            --verify-tag \
+            --notes-file <(python3 tools/notas.py pacotes/lock/lock.json) \
+            pacotes/suite-linux/SUITE.txt \
+            $(find pacotes -type f -name 'rasgo-suite-*')
